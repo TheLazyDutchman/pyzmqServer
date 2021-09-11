@@ -1,5 +1,5 @@
 from typing import Callable
-import Connection
+from . import Connection
 
 
 
