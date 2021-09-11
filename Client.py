@@ -8,7 +8,7 @@ class Client:
     def __init__(self, serverIp: str, eventPort: int, requestSendPort: int, requestReceivePort: int):
         self.eventConnection = Connection.EventReceiver(serverIp, eventPort)
         self.requestSendConnection = Connection.RequestSender(serverIp, requestSendPort)
-        self.requestReceiveConnection = Connection.RequestReceiver(requestReceivePort)
+        # self.requestReceiveConnection = Connection.RequestReceiver(requestReceivePort)
 
     def SetEventCallback(self, eventCallback: Callable) -> None:
         self.eventConnection.SetCallback(eventCallback)
@@ -20,3 +20,6 @@ class Client:
         reply = self.requestSendConnection.SendMessage(requestType, data)
 
         return reply
+
+    def Subscribe(self, topic: str):
+        self.eventConnection.Subscribe(topic)
