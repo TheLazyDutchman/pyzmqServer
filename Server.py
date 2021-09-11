@@ -33,7 +33,7 @@ class Server:
 
         self.groups: dict[str, Group] = []
 
-    def sendRequest(self, groupName: str, clientName: str, requestType: str, data):
+    def SendRequest(self, groupName: str, clientName: str, requestType: str, data):
         client = self.getClient(groupName, clientName)
 
         reply = client.connection.SendMessage(requestType, data)

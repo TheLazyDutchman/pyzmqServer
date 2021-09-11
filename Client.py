@@ -15,3 +15,8 @@ class Client:
 
     def SetRequestCallback(self, requestCallback: Callable) -> None:
         self.requestReceiveConnection.SetCallback(requestCallback)
+
+    def SendRequest(self, requestType: str, data):
+        reply = self.requestSendConnection.SendMessage(requestType, data)
+
+        return reply
