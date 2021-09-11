@@ -20,6 +20,7 @@ class EventSender(Connection):
         self.socket.bind(f"tcp://*:{port}")
 
     def SendMessage(self, topic: str, data):
+        topic = topic.encode('utf-8')
         data = pickle.dumps(data)
 
         self.socket.send_multipart((topic, data))
@@ -33,7 +34,8 @@ class RequestSender(Connection):
     def SendMessage(self, requestType: str, data):
         data = pickle.dumps(data)
 
-        reply = self.socket.send_multipart((requestType, data))
+        self.socket.send_multipart((requestType.encode('utf-8'), data))
+        reply = pickle.loads(self.socket.recv())
 
         return reply
 
@@ -48,7 +50,7 @@ class Reciever(ABC):
 
     def start(self):
         loopThread = threading.Thread(target = self.startLoop)
-        loopThread.daemon = True
+        # loopThread.daemon = True
         loopThread.start()
 
     @abstractmethod
@@ -70,6 +72,8 @@ class EventReceiver(Connection, Reciever):
         while True:
 
             topic, data = self.socket.recv_multipart()
+            topic: str = topic.decode('utf-8')
+            data = pickle.loads(data)
 
             self.callback(topic, data)
 
@@ -85,6 +89,8 @@ class RequestReceiver(Connection, Reciever):
         while True:
 
             requestType, data = self.socket.recv_multipart()
+            requestType: str = requestType.decode('utf-8')
+            data = pickle.loads(data)
 
             answer = self.callback(requestType, data)
             answer = pickle.dumps(answer)

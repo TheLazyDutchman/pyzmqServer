@@ -33,6 +33,9 @@ class Server:
 
         self.groups: dict[str, Group] = []
 
+    def SendEvent(self, target: str, data):
+        self.eventConnection.SendMessage(target, data)
+
     def SendRequest(self, groupName: str, clientName: str, requestType: str, data):
         client = self.getClient(groupName, clientName)
 
