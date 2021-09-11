@@ -1,3 +1,4 @@
+from typing import Callable
 import zmq
 import pickle
 import threading
@@ -40,6 +41,11 @@ class RequestSender(Connection):
 
 class Reciever(ABC):
 
+    callback: Callable = print
+
+    def SetCallback(self, callback: Callable) -> None:
+        self.callback = callback
+
     def start(self):
         loopThread = threading.Thread(target = self.startLoop)
         loopThread.daemon = True
@@ -65,6 +71,8 @@ class EventReceiver(Connection, Reciever):
 
             topic, data = self.socket.recv_multipart()
 
+            self.callback(topic, data)
+
 class RequestReceiver(Connection, Reciever):
     
     def __init__(self, port: int) -> None:
@@ -78,8 +86,8 @@ class RequestReceiver(Connection, Reciever):
 
             requestType, data = self.socket.recv_multipart()
 
-            returnData = "OK"
-            returnData = pickle.dumps(returnData)
+            answer = self.callback(requestType, data)
+            answer = pickle.dumps(answer)
 
-            self.socket.send(returnData)
+            self.socket.send(answer)
 

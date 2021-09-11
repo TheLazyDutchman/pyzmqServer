@@ -1,3 +1,4 @@
+from typing import Callable
 import Connection
 
 
@@ -38,6 +39,9 @@ class Server:
         reply = client.connection.SendMessage(requestType, data)
 
         return reply
+
+    def SetRequestCallback(self, requestCallback: Callable):
+        self.requestConnection.SetCallback(requestCallback)
 
     def getGroup(self, groupName: str) -> Group:
         if not groupName in self.groups:
