@@ -1,4 +1,8 @@
+from dataclasses import dataclass, Field
 from typing import Callable
+
+from .events.event import Event
+from .events.eventHandler import EventHandler
 from . import Connection
 
 
@@ -17,13 +21,22 @@ class ClientNotFoundError(Exception):
         self.clientName = clientName
         super().__init__(message)
 
+@dataclass
 class ClientConnection:
     name: str
     connection: Connection.RequestSender
+    data: dict = Field(default_factory=dict)
 
+    def Set(self, key: str, value) -> None:
+        self.data[key] = value
+    
+    def Get(self, key: str) -> object:
+        return self.data[key]
+
+@dataclass
 class Group:
     name: str
-    clients: dict[str, ClientConnection]
+    clients: dict[str, ClientConnection] = Field(default_factory=dict)
 
 class Server:
 
@@ -31,7 +44,22 @@ class Server:
         self.eventConnection = Connection.EventSender(eventPort)
         self.requestConnection = Connection.RequestReceiver(replyPort)
 
-        self.groups: dict[str, Group] = []
+        self.groups: dict[str, Group] = {}
+        self.groups["main"] = Group("main")
+
+        self.eventHandler = EventHandler()
+
+        self.requestConnection.SetCallback(self.eventHandler.handleEvent)
+
+        joinGroupEvent = Event("join group")
+        self.eventHandler.addEventListener(joinGroupEvent, self.joinGroup)
+
+    def joinGroup(self, eventData):
+        groupName, clientName, clientIp, clientRequestRecievePort = eventData
+        group = self.getGroup(groupName)
+
+        connection = Connection.RequestSender(clientIp, clientRequestRecievePort)
+        group.clients[clientName] = ClientConnection(clientName, connection)
 
     def SendEvent(self, target: str, data):
         self.eventConnection.SendMessage(target, data)
@@ -43,8 +71,8 @@ class Server:
 
         return reply
 
-    def SetRequestCallback(self, requestCallback: Callable):
-        self.requestConnection.SetCallback(requestCallback)
+    def AddRequestListener(self, name: str, listener: Callable):
+        self.eventHandler.addEventListener(Event(name), listener)
 
     def getGroup(self, groupName: str) -> Group:
         if not groupName in self.groups:
