@@ -1,3 +1,4 @@
+from events.eventHandler import EventHandler
 from typing import Callable
 from . import Connection
 
@@ -32,6 +33,7 @@ class Server:
         self.requestConnection = Connection.RequestReceiver(replyPort)
 
         self.groups: dict[str, Group] = []
+        self.eventHandler = EventHandler()
 
     def SendEvent(self, target: str, data):
         self.eventConnection.SendMessage(target, data)
