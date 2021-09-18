@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Callable
 
 from .events.event import Event
@@ -20,10 +21,19 @@ class ClientNotFoundError(Exception):
         self.clientName = clientName
         super().__init__(message)
 
+@dataclass
 class ClientConnection:
     name: str
     connection: Connection.RequestSender
+    data: dict
 
+    def Set(self, key: str, value) -> None:
+        self.data[key] = value
+    
+    def Get(self, key: str) -> object:
+        return self.data[key]
+
+@dataclass
 class Group:
     name: str
     clients: dict[str, ClientConnection]
