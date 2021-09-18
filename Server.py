@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, Field
 from typing import Callable
 
 from .events.event import Event
@@ -25,7 +25,7 @@ class ClientNotFoundError(Exception):
 class ClientConnection:
     name: str
     connection: Connection.RequestSender
-    data: dict
+    data: dict = Field(default_factory=dict)
 
     def Set(self, key: str, value) -> None:
         self.data[key] = value
@@ -36,7 +36,7 @@ class ClientConnection:
 @dataclass
 class Group:
     name: str
-    clients: dict[str, ClientConnection]
+    clients: dict[str, ClientConnection] = Field(default_factory=dict)
 
 class Server:
 
@@ -44,10 +44,22 @@ class Server:
         self.eventConnection = Connection.EventSender(eventPort)
         self.requestConnection = Connection.RequestReceiver(replyPort)
 
-        self.groups: dict[str, Group] = []
+        self.groups: dict[str, Group] = {}
+        self.groups["main"] = Group("main")
+
         self.eventHandler = EventHandler()
 
         self.requestConnection.SetCallback(self.eventHandler.handleEvent)
+
+        joinGroupEvent = Event("join group")
+        self.eventHandler.addEventListener(joinGroupEvent, self.joinGroup)
+
+    def joinGroup(self, eventData):
+        groupName, clientName, clientIp, clientRequestRecievePort = eventData
+        group = self.getGroup(groupName)
+
+        connection = Connection.RequestSender(clientIp, clientRequestRecievePort)
+        group.clients[clientName] = ClientConnection(clientName, connection)
 
     def SendEvent(self, target: str, data):
         self.eventConnection.SendMessage(target, data)

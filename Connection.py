@@ -33,10 +33,11 @@ class RequestSender(Connection):
         self.socket = context.socket(zmq.REQ)
         self.socket.connect(f"tcp://{serverIp}:{port}")
 
-    def SendMessage(self, requestType: str, data):
+    def SendMessage(self, requestType: Event, data):
+        event = pickle.dumps(requestType)
         data = pickle.dumps(data)
 
-        self.socket.send_multipart((requestType.encode('utf-8'), data))
+        self.socket.send_multipart((event, data))
         reply = pickle.loads(self.socket.recv())
 
         return reply
