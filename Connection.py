@@ -4,6 +4,8 @@ import pickle
 import threading
 from abc import ABC, abstractmethod
 
+from .events.event import Event
+
 context = zmq.Context()
 
 
@@ -89,7 +91,7 @@ class RequestReceiver(Connection, Reciever):
         while True:
 
             requestType, data = self.socket.recv_multipart()
-            requestType: str = requestType.decode('utf-8')
+            requestType: Event = pickle.loads(requestType)
             data = pickle.loads(data)
 
             answer = self.callback(requestType, data)

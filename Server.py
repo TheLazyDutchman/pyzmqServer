@@ -1,5 +1,7 @@
-from events.eventHandler import EventHandler
 from typing import Callable
+
+from .events.event import Event
+from .events.eventHandler import EventHandler
 from . import Connection
 
 
@@ -35,6 +37,8 @@ class Server:
         self.groups: dict[str, Group] = []
         self.eventHandler = EventHandler()
 
+        self.requestConnection.SetCallback(self.eventHandler.handleEvent)
+
     def SendEvent(self, target: str, data):
         self.eventConnection.SendMessage(target, data)
 
@@ -45,8 +49,8 @@ class Server:
 
         return reply
 
-    def SetRequestCallback(self, requestCallback: Callable):
-        self.requestConnection.SetCallback(requestCallback)
+    def AddRequestListener(self, name: str, listener: Callable):
+        self.eventHandler.addEventListener(Event(name), listener)
 
     def getGroup(self, groupName: str) -> Group:
         if not groupName in self.groups:
