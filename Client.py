@@ -1,5 +1,7 @@
 from typing import Callable
+
 from . import Connection
+from .events.event import Event
 
 
 
@@ -17,7 +19,8 @@ class Client:
         self.requestReceiveConnection.SetCallback(requestCallback)
 
     def SendRequest(self, requestType: str, data):
-        reply = self.requestSendConnection.SendMessage(requestType, data)
+        event = Event(requestType)
+        reply = self.requestSendConnection.SendMessage(event, data)
 
         return reply
 
