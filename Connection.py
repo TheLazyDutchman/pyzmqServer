@@ -5,6 +5,7 @@ import threading
 from abc import ABC, abstractmethod
 
 from .events.event import Event
+from .events.eventHandler import EventNotFound
 
 context = zmq.Context()
 
@@ -90,13 +91,16 @@ class RequestReceiver(Connection, Reciever):
 
     def startLoop(self):
         while True:
+            answer = None
+            try:
+                requestType, data = self.socket.recv_multipart()
+                requestType: Event = pickle.loads(requestType)
+                data = pickle.loads(data)
 
-            requestType, data = self.socket.recv_multipart()
-            requestType: Event = pickle.loads(requestType)
-            data = pickle.loads(data)
-
-            answer = self.callback(requestType, data)
-            answer = pickle.dumps(answer)
-
-            self.socket.send(answer)
+                answer = self.callback(requestType, data)
+            except EventNotFound as e:
+                answer = e.message
+            finally:
+                answer = pickle.dumps(answer)
+                self.socket.send(answer)
 
