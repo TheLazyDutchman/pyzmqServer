@@ -23,13 +23,11 @@ class EventHandler:
         answer = None
         for listener in self.listeners[eventType.name]:
             currentAnswer = listener(eventData)
-            print(currentAnswer)
             if not currentAnswer == None:
                 answer = currentAnswer
-                return currentAnswer
 
-        # return answer
-
+        return answer
+        
     def addEventListener(self, eventType: Event, listener: Callable) -> None:
         if not eventType.name in self.listeners:
             self.listeners[eventType.name] = []
