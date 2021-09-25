@@ -5,6 +5,7 @@ import threading
 from abc import ABC, abstractmethod
 
 from .events.event import Event
+from .events.eventHandler import EventNotFound
 
 context = zmq.Context()
 
@@ -51,9 +52,9 @@ class Reciever(ABC):
     def SetCallback(self, callback: Callable) -> None:
         self.callback = callback
 
-    def start(self):
+    def start(self, daemon: bool = True):
         loopThread = threading.Thread(target = self.startLoop)
-        # loopThread.daemon = True
+        loopThread.setDaemon(daemon)
         loopThread.start()
 
     @abstractmethod
@@ -62,11 +63,11 @@ class Reciever(ABC):
 
 class EventReceiver(Connection, Reciever):
     
-    def __init__(self, serverIp: str, port: int) -> None:
+    def __init__(self, serverIp: str, port: int, daemon: bool = True) -> None:
         self.socket = context.socket(zmq.SUB)
         self.socket.connect(f"tcp://{serverIp}:{port}")
 
-        self.start()
+        self.start(daemon)
 
     def Subscribe(self, topic: str):
         self.socket.subscribe(topic)
@@ -82,21 +83,24 @@ class EventReceiver(Connection, Reciever):
 
 class RequestReceiver(Connection, Reciever):
     
-    def __init__(self, port: int) -> None:
+    def __init__(self, port: int, daemon: bool = True) -> None:
         self.socket = context.socket(zmq.REP)
         self.socket.bind(f"tcp://*:{port}")
 
-        self.start()
+        self.start(daemon)
 
     def startLoop(self):
         while True:
+            answer = None
+            try:
+                requestType, data = self.socket.recv_multipart()
+                requestType: Event = pickle.loads(requestType)
+                data = pickle.loads(data)
 
-            requestType, data = self.socket.recv_multipart()
-            requestType: Event = pickle.loads(requestType)
-            data = pickle.loads(data)
-
-            answer = self.callback(requestType, data)
-            answer = pickle.dumps(answer)
-
-            self.socket.send(answer)
+                answer = self.callback(requestType, data)
+            except EventNotFound as e:
+                answer = e.message
+            finally:
+                answer = pickle.dumps(answer)
+                self.socket.send(answer)
 
