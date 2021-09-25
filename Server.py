@@ -42,7 +42,7 @@ class Server:
 
     def __init__(self, eventPort: int, replyPort: int):
         self.eventConnection = Connection.EventSender(eventPort)
-        self.requestConnection = Connection.RequestReceiver(replyPort)
+        self.requestConnection = Connection.RequestReceiver(replyPort, daemon = False)
 
         self.groups: dict[str, Group] = {}
         self.groups["main"] = Group("main")
