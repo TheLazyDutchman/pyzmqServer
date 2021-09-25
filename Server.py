@@ -67,7 +67,8 @@ class Server:
     def SendRequest(self, groupName: str, clientName: str, requestType: str, data):
         client = self.getClient(groupName, clientName)
 
-        reply = client.connection.SendMessage(requestType, data)
+        event = Event(requestType)
+        reply = client.connection.SendMessage(event, data)
 
         return reply
 

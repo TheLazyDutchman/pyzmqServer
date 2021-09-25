@@ -2,6 +2,7 @@ from typing import Callable
 
 from . import Connection
 from .events.event import Event
+from .events.eventHandler import EventHandler
 
 
 
@@ -17,6 +18,10 @@ class Client:
         groupName = "main"
         clientName = "client"
 
+        self.eventHandler = EventHandler()
+
+        self.requestReceiveConnection.SetCallback(self.eventHandler.handleEvent)
+
 
         eventData = groupName, clientName, clientIp, requestReceivePort
         self.requestSendConnection.SendMessage(joinGroupEvent, eventData)
@@ -24,8 +29,8 @@ class Client:
     def SetEventCallback(self, eventCallback: Callable) -> None:
         self.eventConnection.SetCallback(eventCallback)
 
-    def SetRequestCallback(self, requestCallback: Callable) -> None:
-        self.requestReceiveConnection.SetCallback(requestCallback)
+    def AddRequestListener(self, name: str, listener: Callable):
+        self.eventHandler.addEventListener(Event(name), listener)
 
     def SendRequest(self, requestType: str, data):
         event = Event(requestType)
