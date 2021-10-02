@@ -25,13 +25,6 @@ class ClientNotFoundError(Exception):
 class ClientConnection:
     name: str
     connection: Connection.RequestSender
-    data: dict = field(default_factory=dict)
-
-    def Set(self, key: str, value) -> None:
-        self.data[key] = value
-    
-    def Get(self, key: str) -> object:
-        return self.data[key]
 
 @dataclass
 class Group:
@@ -40,9 +33,11 @@ class Group:
 
 class Server:
 
-    def __init__(self, eventPort: int, replyPort: int):
+    def __init__(self, eventPort: int, replyPort: int, clientType: type[ClientConnection] = ClientConnection):
         self.eventConnection = Connection.EventSender(eventPort)
         self.requestConnection = Connection.RequestReceiver(replyPort, daemon = False)
+
+        self.clientType = clientType
 
         self.groups: dict[str, Group] = {}
         self.groups["main"] = Group("main")
@@ -59,7 +54,7 @@ class Server:
         group = self.getGroup(groupName)
 
         connection = Connection.RequestSender(clientIp, clientRequestRecievePort)
-        group.clients[clientName] = ClientConnection(clientName, connection)
+        group.clients[clientName] = self.clientType(clientName, connection)
 
     def SendEvent(self, target: str, data):
         self.eventConnection.SendMessage(target, data)
