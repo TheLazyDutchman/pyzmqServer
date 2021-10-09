@@ -3,15 +3,20 @@ from typing import Callable
 from . import Connection
 from .events.event import Event
 from .events.eventHandler import EventHandler
+import socket
 
 
 
 class Client:
 
-    def __init__(self, clientIp: str, serverIp: str, eventPort: int, requestSendPort: int, requestReceivePort: int):
+    def __init__(self, serverIp: str, eventPort: int, requestSendPort: int, requestReceivePort: int):
         self.eventConnection = Connection.EventReceiver(serverIp, eventPort)
         self.requestSendConnection = Connection.RequestSender(serverIp, requestSendPort)
         self.requestReceiveConnection = Connection.RequestReceiver(requestReceivePort)
+
+        hostName = socket.gethostname()
+        clientIp = socket.gethostbyname(hostName)
+        
 
         joinGroupEvent = Event("join group")
 
