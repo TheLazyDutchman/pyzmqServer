@@ -1,10 +1,10 @@
 # pyzmqServer
 this is a python client-server connection library built on pyzmq.
-## usage
-### server side
+## Usage
+### Server side
 to use the server, you have to import the 'Server' class from 'pyzmqServer.server'.
 
-#### initialization
+#### Initialization
 
 creating a server has three arguments.
 * eventPort - the port where the clients can listen for server events.
@@ -17,11 +17,20 @@ from pyzmqServer.server import Server
 eventSendPort = 5555
 requestRecvReplyPort = 5556
 
-conn = Server(eventSendPort, requestRecvReplyPort)
+server = Server(eventSendPort, requestRecvReplyPort)
 ```
-### client side
+#### Events
+the server has a built-in event listener for requests that are sent by the client.
+
+ arguments:
+ * name - the name of the event type to listen for.
+ * listener - a callback to call when the event is received.
+ ```python
+server.AddRequestListener("MyEvent", myEvent.handle)
+ ```
+### Client side
 to use the client, you need to import the 'Client' class from 'pyzmqServer.client'.
-#### initialization
+#### Initialization
 creating a client has five arguments:
 * clientIp - the IP address of the client as a string.
 * serverIp - the IP address of the server as a string.
@@ -37,5 +46,17 @@ eventRecvPort = 5555
 requestSendPort = 5556
 requestRecvReplyPort = 5557
 
-conn = Server(eventRecvPort, requestSendPort, requestRecvReplyPort)
+client = Client(eventRecvPort, requestSendPort, requestRecvReplyPort)
 ```
+
+#### Events
+the client has a built-in event listener for requests that are sent by the server.
+ - [x] event handler for server requests.
+ - [ ] event handler for server events.
+
+ arguments:
+ * name - the name of the event type to listen for.
+ * listener - a callback to call when the event is received.
+ ```python
+client.AddRequestListener("MyEvent", myEvent.handle)
+ ```
