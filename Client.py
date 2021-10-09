@@ -8,10 +8,14 @@ from .events.eventHandler import EventHandler
 
 class Client:
 
-    def __init__(self, clientIp: str, serverIp: str, eventPort: int, requestSendPort: int, requestReceivePort: int):
+    def __init__(self, serverIp: str, eventPort: int, requestSendPort: int, requestReceivePort: int):
         self.eventConnection = Connection.EventReceiver(serverIp, eventPort)
         self.requestSendConnection = Connection.RequestSender(serverIp, requestSendPort)
         self.requestReceiveConnection = Connection.RequestReceiver(requestReceivePort)
+
+        hostName = self.eventConnection.socket.gethostname()
+        clientIp = self.eventConnection.socket.gethostbyname(hostName)
+        
 
         joinGroupEvent = Event("join group")
 

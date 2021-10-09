@@ -36,7 +36,6 @@ server.AddRequestListener("MyEvent", myEvent.handle)
 to use the client, you need to import the 'Client' class from 'pyzmqServer.client'.
 #### Initialization
 creating a client has five arguments:
-* clientIp - the IP address of the client as a string.
 * serverIp - the IP address of the server as a string.
 * eventPort - the port on the server where the client listens for server events.
 * requestSendPort - the port on the server listens to which the client can send a request.
@@ -44,13 +43,12 @@ creating a client has five arguments:
 ``` python
 from pyzmqServer.client import Client
 
-clientIp = "127.0.0.1"
-serverIp = "127.0.0.1"
+serverIp = "127.0.0.1" # normally this would of course not be localhost but an actual server
 eventRecvPort = 5555
 requestSendPort = 5556
 requestRecvReplyPort = 5557
 
-client = Client(eventRecvPort, requestSendPort, requestRecvReplyPort)
+client = Client(serverIp, eventRecvPort, requestSendPort, requestRecvReplyPort)
 ```
 
 #### Events
