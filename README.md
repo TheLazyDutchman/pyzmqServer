@@ -1,10 +1,10 @@
 # pyzmqServer
-this is a python client-server connection library built on pyzmq.
+this is a python client-server connection library built on [pyzmq]("https://github.com/zeromq/pyzmq" "The python zmq library").
 ## Usage
 
-[Server Usage](#Server-side "Goto Server-side")
+[Server Usage](#Server-side "Goto Server side")
 
-[Client Usage](#Client-side "Goto Client-side")
+[Client Usage](#Client-side "Goto Client side")
 ### Server side
 to use the server, you have to import the 'Server' class from 'pyzmqServer.server'.
 
