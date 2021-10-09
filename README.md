@@ -2,10 +2,9 @@
 this is a python client-server connection library built on pyzmq.
 ## Usage
 
-[Server Usage](#Server side) 
-    Server side<a name="Server side"></a>
-[Client Usage](#Client side) 
-    Client side<a name="Client side"></a>
+[Server Usage](#Server_side)
+
+[Client Usage](#Client_side)
 ### Server side
 to use the server, you have to import the 'Server' class from 'pyzmqServer.server'.
 
