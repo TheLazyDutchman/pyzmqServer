@@ -1,6 +1,6 @@
 from typing import Callable
 
-from . import Connection
+from . import connection
 from .events.event import Event
 from .events.eventHandler import EventHandler
 import socket
@@ -10,9 +10,9 @@ import socket
 class Client:
 
     def __init__(self, serverIp: str, eventPort: int, requestSendPort: int, requestReceivePort: int):
-        self.eventConnection = Connection.EventReceiver(serverIp, eventPort)
-        self.requestSendConnection = Connection.RequestSender(serverIp, requestSendPort)
-        self.requestReceiveConnection = Connection.RequestReceiver(requestReceivePort)
+        self.eventConnection = connection.EventReceiver(serverIp, eventPort)
+        self.requestSendConnection = connection.RequestSender(serverIp, requestSendPort)
+        self.requestReceiveConnection = connection.RequestReceiver(requestReceivePort)
 
         hostName = socket.gethostname()
         clientIp = socket.gethostbyname(hostName)

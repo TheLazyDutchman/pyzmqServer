@@ -3,7 +3,7 @@ from typing import Callable
 
 from .events.event import Event
 from .events.eventHandler import EventHandler
-from . import Connection
+from . import connection
 
 
 
@@ -24,7 +24,7 @@ class ClientNotFoundError(Exception):
 @dataclass
 class ClientConnection:
     name: str
-    connection: Connection.RequestSender
+    connection: connection.RequestSender
 
 @dataclass
 class Group:
@@ -34,8 +34,8 @@ class Group:
 class Server:
 
     def __init__(self, eventPort: int, replyPort: int, clientType: type[ClientConnection] = ClientConnection):
-        self.eventConnection = Connection.EventSender(eventPort)
-        self.requestConnection = Connection.RequestReceiver(replyPort, daemon = False)
+        self.eventConnection = connection.EventSender(eventPort)
+        self.requestConnection = connection.RequestReceiver(replyPort, daemon = False)
 
         self.clientType = clientType
 
@@ -53,8 +53,8 @@ class Server:
         groupName, clientName, clientIp, clientRequestRecievePort = eventData
         group = self.getGroup(groupName)
 
-        connection = Connection.RequestSender(clientIp, clientRequestRecievePort)
-        group.clients[clientName] = self.clientType(clientName, connection)
+        conn = connection.RequestSender(clientIp, clientRequestRecievePort)
+        group.clients[clientName] = self.clientType(clientName, conn)
 
     def SendEvent(self, target: str, data):
         self.eventConnection.SendMessage(target, data)
