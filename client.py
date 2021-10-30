@@ -24,8 +24,9 @@ class Client:
         clientName = "client"
 
         self.eventHandler = EventHandler()
+        self.requestHandler = EventHandler()
 
-        self.requestReceiveConnection.SetCallback(self.eventHandler.handleEvent)
+        self.requestReceiveConnection.SetCallback(self.requestHandler.handleEvent)
 
 
         eventData = groupName, clientName, clientIp, requestReceivePort
@@ -35,7 +36,7 @@ class Client:
         self.eventConnection.SetCallback(eventCallback)
 
     def AddRequestListener(self, name: str, listener: Callable):
-        self.eventHandler.addEventListener(Event(name), listener)
+        self.requestHandler.addEventListener(Event(name), listener)
 
     def SendRequest(self, requestType: str, data):
         event = Event(requestType)
