@@ -1,7 +1,7 @@
 from typing import Callable
 
 from .event import Event
-from .eventQueue import EventQueue, QueueFull
+from .eventQueue import EventQueue
 
 
 
@@ -35,10 +35,14 @@ class EventHandler:
 
         self.queues[eventType.name] = EventQueue(maxQueueSize)
         
-    # def setEventListener(self, eventType: Event, listener: Callable) -> None:
-    #     # if not eventType.name in self.listeners:
-    #     #     # TODO: raise error here
-    #     #     return
+    def setEventHandler(self, eventType: Event, eventHandler: Callable, handle: Callable, *args) -> None:
+        if not eventType.name in self.queues:
+            raise EventNotFound(eventType, f"event {eventType.name} has not been added yet. Please use eventHandler.addEvent")
 
-    #     # self.queues[eventType.name].append(listener)
-    #     pass
+        self.handleEvent(self.queues[eventType.name], eventHandler, handle, *args)
+        
+    def handleEvent(self, queue: EventQueue, eventHandler: Callable, handle: Callable, *args) -> None:
+        if not queue.empty():
+            eventHandler(queue.get())
+
+        handle(*args, self.handleEvent, queue, eventHandler, handle, *args)

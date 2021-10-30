@@ -1,4 +1,4 @@
-from queue import Queue, QueueFull
+from queue import Queue
 
 
 
