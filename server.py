@@ -52,22 +52,13 @@ class Server:
 
         self.requestConnection.SetCallback(self.requestHandler.handleEvent)
 
-        self.requestHandler.addEventLoop("main", 1)
+        self.requestHandler.addEventLoop("main")
 
         joinGroupEvent = Event("join group")
         self.requestHandler.addEvent(joinGroupEvent)
 
 
-        joinThread = threading.Thread(
-            target = self.requestHandler.setEventHandler, 
-            args = (
-                joinGroupEvent,
-                self.joinGroup,
-                self.after,
-                100
-                ))
-        joinThread.setDaemon(True)
-        joinThread.start()
+        self.requestHandler.setEventHandler("main", joinGroupEvent, self.joinGroup)
 
     def joinGroup(self, eventData):
         groupName, clientName, clientIp, clientRequestRecievePort = eventData
@@ -90,8 +81,11 @@ class Server:
     def addRequestType(self, name: str):
         self.requestHandler.addEvent(Event(name))
 
-    def setRequestHandler(self, requestType: str, requestHandler: Callable, handle: Callable, *args):
-        self.requestHandler.setEventHandler(Event(requestType), requestHandler, handle, *args)
+    def setRequestHandler(self, requestType: str, requestHandler: Callable, loopName = "main"):
+        self.requestHandler.setEventHandler(loopName, Event(requestType), requestHandler)
+
+    def createEventLoop(self, name: str, timeout: float = 1) -> None:
+        self.requestHandler.addEventLoop(name, timeout)
 
     def getGroup(self, groupName: str) -> Group:
         if not groupName in self.groups:
