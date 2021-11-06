@@ -22,11 +22,11 @@ class EventSender(Connection):
         self.socket = context.socket(zmq.PUB)
         self.socket.bind(f"tcp://*:{port}")
 
-    def SendMessage(self, topic: str, data):
-        topic = topic.encode('utf-8')
-        data = pickle.dumps(data)
+    def SendMessage(self, target: str, eventType: Event, data):
+        target = target.encode('utf-8')
+        data = pickle.dumps((eventType, data))
 
-        self.socket.send_multipart((topic, data))
+        self.socket.send_multipart((target, data))
 
 class RequestSender(Connection):
     
@@ -75,11 +75,11 @@ class EventReceiver(Connection, Reciever):
     def startLoop(self):
         while True:
 
-            requestType, data = self.socket.recv_multipart()
-            requestType: Event = pickle.loads(requestType)
+            target, data = self.socket.recv_multipart()
+            target = target.decode('utf-8')
             data = pickle.loads(data)
 
-            self.callback(requestType, data)
+            self.callback(target, data)
 
 class RequestReceiver(Connection, Reciever):
     

@@ -30,6 +30,9 @@ class ClientConnection:
     name: str
     connection: connection.RequestSender
 
+    def sendRequest(self, requestType: str, data: object) -> None:
+        self.connection.SendMessage(Event(requestType), data)
+
 @dataclass
 class Group:
     name: str
@@ -52,13 +55,14 @@ class Server:
 
         self.requestConnection.SetCallback(self.requestHandler.handleEvent)
 
-        self.requestHandler.addEventLoop("main")
+        self.requestHandler.addEventLoop("mainloop")
 
         joinGroupEvent = Event("join group")
         self.requestHandler.addEvent(joinGroupEvent)
 
 
-        self.requestHandler.setEventHandler("main", joinGroupEvent, self.joinGroup)
+        self.requestHandler.setEventHandler("mainloop", joinGroupEvent, self.joinGroup)
+        self.requestHandler.startLoop("mainloop")
 
     def joinGroup(self, eventData):
         groupName, clientName, clientIp, clientRequestRecievePort = eventData
@@ -67,8 +71,8 @@ class Server:
         conn = connection.RequestSender(clientIp, clientRequestRecievePort)
         group.clients[clientName] = self.clientType(clientName, conn)
 
-    def SendEvent(self, target: str, data):
-        self.eventConnection.SendMessage(target, data)
+    def SendEvent(self, target: str, eventType: str, data):
+        self.eventConnection.SendMessage(target, Event(eventType), data)
 
     def SendRequest(self, groupName: str, clientName: str, requestType: str, data):
         client = self.getClient(groupName, clientName)
@@ -81,7 +85,7 @@ class Server:
     def addRequestType(self, name: str):
         self.requestHandler.addEvent(Event(name))
 
-    def setRequestHandler(self, requestType: str, requestHandler: Callable, loopName = "main"):
+    def setRequestHandler(self, requestType: str, requestHandler: Callable, loopName = "mainloop"):
         self.requestHandler.setEventHandler(loopName, Event(requestType), requestHandler)
 
     def createEventLoop(self, name: str, timeout: float = 1) -> None:

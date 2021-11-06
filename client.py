@@ -24,12 +24,14 @@ class Client:
         clientName = "client"
 
         self.eventHandler = EventHandler()
-        self.eventConnection.SetCallback(self.eventHandler.handleEvent)
+        self.eventConnection.SetCallback(lambda _, data: self.eventHandler.handleEvent(data[0], data[1]))
         self.eventHandler.addEventLoop("main")
+        self.eventHandler.startLoop("main")
 
         self.requestHandler = EventHandler()
         self.requestReceiveConnection.SetCallback(self.requestHandler.handleEvent)
         self.requestHandler.addEventLoop("main")
+        self.requestHandler.startLoop("main")
 
 
         eventData = groupName, clientName, clientIp, requestReceivePort

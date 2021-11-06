@@ -16,7 +16,7 @@ class EventNotFound(Exception):
 class EventHandler:
 
     def __init__(self) -> None:
-        self.queues: dict[Event, EventQueue] = {} 
+        self.queues: dict[str, EventQueue] = {} 
 
         self.loops: dict[str, EventLoop] = {}
 
@@ -48,20 +48,19 @@ class EventHandler:
 
     def setEventHandler(self, loopName: str, eventType: Event, handler: Callable) -> None:
         if not loopName in self.loops:
-            # TODO: handle errors
+            print("no loop with name: ", loopName)
             return
 
-        if not eventType in self.queues: 
-            # TODO: handle errors
-            return
+        if not eventType.name in self.queues:
+            raise EventNotFound(eventType, f"No listener defined for event {eventType.name}")
 
-        queue = self.queues[eventType]
+        queue = self.queues[eventType.name]
 
         self.loops[loopName].addEvent(queue, handler)
 
     def startLoop(self, loopName: str):
         if not loopName in self.loops:
-            # TODO: handle errors
+            print("no loop with name: ", loopName)
             return
         
         self.loops[loopName].start()
