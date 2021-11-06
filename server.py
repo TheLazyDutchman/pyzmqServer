@@ -1,8 +1,12 @@
 from dataclasses import dataclass, field
 from typing import Callable
+from time import sleep
+
+import threading
 
 from .events.event import Event
 from .events.eventHandler import EventHandler
+from .events.eventLoop import EventLoop
 from . import connection
 
 
@@ -39,15 +43,31 @@ class Server:
 
         self.clientType = clientType
 
+        self.eventLoops: dict[str, EventLoop] = {}
+
         self.groups: dict[str, Group] = {}
         self.groups["main"] = Group("main")
 
-        self.eventHandler = EventHandler()
+        self.requestHandler = EventHandler()
 
-        self.requestConnection.SetCallback(self.eventHandler.handleEvent)
+        self.requestConnection.SetCallback(self.requestHandler.handleEvent)
+
+        self.requestHandler.addEventLoop("main", 1)
 
         joinGroupEvent = Event("join group")
-        self.eventHandler.addEventListener(joinGroupEvent, self.joinGroup)
+        self.requestHandler.addEvent(joinGroupEvent)
+
+
+        joinThread = threading.Thread(
+            target = self.requestHandler.setEventHandler, 
+            args = (
+                joinGroupEvent,
+                self.joinGroup,
+                self.after,
+                100
+                ))
+        joinThread.setDaemon(True)
+        joinThread.start()
 
     def joinGroup(self, eventData):
         groupName, clientName, clientIp, clientRequestRecievePort = eventData
@@ -67,8 +87,11 @@ class Server:
 
         return reply
 
-    def AddRequestListener(self, name: str, listener: Callable):
-        self.eventHandler.addEventListener(Event(name), listener)
+    def addRequestType(self, name: str):
+        self.requestHandler.addEvent(Event(name))
+
+    def setRequestHandler(self, requestType: str, requestHandler: Callable, handle: Callable, *args):
+        self.requestHandler.setEventHandler(Event(requestType), requestHandler, handle, *args)
 
     def getGroup(self, groupName: str) -> Group:
         if not groupName in self.groups:
