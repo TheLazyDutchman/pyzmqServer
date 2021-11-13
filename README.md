@@ -26,12 +26,30 @@ server = Server(eventSendPort, requestRecvReplyPort)
 #### Events
 the server has a built-in event listener for requests that are sent by the client.
 
- arguments:
- * name - the name of the event type to listen for.
- * listener - a callback to call when the event is received.
- ```python
-server.AddRequestListener("MyEvent", myEvent.handle)
- ```
+to add a request type, you call:
+```python
+server.AddRequestType("RequestName")
+```
+
+now, to make them do something, you have to give them handlers:
+```python
+server.SetRequestHandler("RequestName", requestHandler)
+```
+where requestHandler is just a callable function.
+if you do it like this, the request are added to the main loop, that updates every second.
+
+you can also create your own loops, that run in their own threads:
+```python
+server.createEventLoop("RequestLoopName", timeout=1)
+server.SetEventHandler("RequestName", requestHandler, "RequestLoopName")
+server.eventHandler.startLoop("RequestLoopName")
+```
+* again, requestHandler is just a `Callable`.
+* timeout is the amount of seconds that the loop waits between updates, it defaults to 1.
+
+to start the loop, you need to actually reference the `requestHandler` that the server has, later this will be supported normally.
+
+loops created like this run in a separate thread.
 ### Client side
 to use the client, you need to import the 'Client' class from 'pyzmqServer.client'.
 #### Initialization
@@ -51,14 +69,41 @@ requestRecvReplyPort = 5557
 client = Client(serverIp, eventRecvPort, requestSendPort, requestRecvReplyPort)
 ```
 
-#### Events
-the client has a built-in event listener for requests that are sent by the server.
- - [x] event handler for server requests.
- - [ ] event handler for server events.
+#### Requests and Events
+the client has a built-in event listener for requests and events that are sent by the server.
 
- arguments:
- * name - the name of the event type to listen for.
- * listener - a callback to call when the event is received.
- ```python
-client.AddRequestListener("MyEvent", myEvent.handle)
- ```
+to add an event type, you call:
+```python
+client.AddEventType("EventName")
+```
+
+adding a request type is very similar:
+```python
+client.AddRequestType("RequestName")
+```
+
+now, to make them do something, you have to give them handlers:
+```python
+client.SetEventHandler("EventName", eventHandler)
+client.SetRequestHandler("RequestName", requestHandler)
+```
+where eventHandler and requestHandler are just callable functions.
+if you do it like this, the events and request are added to the main loop, that updates every second.
+
+you can also create your own loops, that run in their own threads:
+```python
+client.createEventLoop("EventLoopName", timeout=1)
+client.SetEventHandler("EventName", eventHandler, "EventLoopName")
+client.eventHandler.startLoop("EventLoopName")
+
+client.createRequestLoop("RequestLoopName", timeout=1)
+client.SetRequestHandler("RequestName", requestHandler, "RequestLoopName")
+client.requestHandler.startLoop("RequestLoopName")
+```
+* again, eventHandler and requestHandler are just `Callable`s.
+* timeout is the amount of seconds that the loop waits between updates, it defaults to 1
+
+to start the loop, you need to actually reference the `eventHandler` and `requestHandler` that the client has, later this will be supported normally.
+
+loops created like this run in a separate thread.
+I'm thinking about later merging events and requests to run in the same loop.

@@ -1,4 +1,5 @@
 from typing import Callable
+import tkinter as tk
 
 from . import connection
 from .events.event import Event
@@ -24,18 +25,45 @@ class Client:
         clientName = "client"
 
         self.eventHandler = EventHandler()
+        self.eventConnection.SetCallback(lambda _, data: self.eventHandler.handleEvent(data[0], data[1]))
+        self.eventHandler.addEventLoop("main")
+        self.eventHandler.startLoop("main")
 
-        self.requestReceiveConnection.SetCallback(self.eventHandler.handleEvent)
+        self.requestHandler = EventHandler()
+        self.requestReceiveConnection.SetCallback(self.requestHandler.handleEvent)
+        self.requestHandler.addEventLoop("main")
+        self.requestHandler.startLoop("main")
 
 
         eventData = groupName, clientName, clientIp, requestReceivePort
         self.requestSendConnection.SendMessage(joinGroupEvent, eventData)
 
-    def SetEventCallback(self, eventCallback: Callable) -> None:
-        self.eventConnection.SetCallback(eventCallback)
 
-    def AddRequestListener(self, name: str, listener: Callable):
-        self.eventHandler.addEventListener(Event(name), listener)
+
+    def addRequestType(self, requestType: str):
+        self.requestHandler.addEvent(Event(requestType))
+
+    def setRequestHandler(self, eventType: str, requestHandler: Callable, loopName: str = "main"):
+        self.requestHandler.setEventHandler(loopName, Event(eventType), requestHandler)
+
+    def createRequestLoop(self, name: str, timeout: float = 1) -> None:
+        self.requestHandler.addEventLoop(name, timeout)
+
+    def createTkinterRequestLoop(self, name: str, app: tk.Tk, timeout: float = 1) -> None:
+        self.requestHandler.addTkinterEventLoop(name, app, timeout)
+        self.requestHandler.startLoop(name)
+
+
+    def addEventType(self, eventType: str):
+        self.eventHandler.addEvent(Event(eventType))
+
+    def setEventHandler(self, eventType: str, eventHandler: Callable, loopName: str = "main"):
+        self.eventHandler.setEventHandler(loopName, Event(eventType), eventHandler)
+
+    def createEventLoop(self, name: str, timeout: float = 1) -> None:
+        self.eventHandler.addEventLoop(name, timeout)
+
+
 
     def SendRequest(self, requestType: str, data):
         event = Event(requestType)
