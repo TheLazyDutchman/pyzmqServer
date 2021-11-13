@@ -51,6 +51,7 @@ class Client:
 
     def createTkinterRequestLoop(self, name: str, app: tk.Tk, timeout: float = 1) -> None:
         self.requestHandler.addTkinterEventLoop(name, app, timeout)
+        self.requestHandler.startLoop(name)
 
 
     def addEventType(self, eventType: str):

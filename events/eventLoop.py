@@ -63,7 +63,7 @@ class TkinterLoop(EventLoop):
 
             handler.function(event)
 
-        self.app.after(self.timeout / 1000, self.loop)
+        self.app.after(self.timeout * 1000, self.loop)
 
     def start(self) -> None:
-        self.app.after(self.timeout / 1000, self.loop)
+        self.app.after(self.timeout * 1000, self.loop)
