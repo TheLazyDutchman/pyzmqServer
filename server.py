@@ -88,7 +88,7 @@ class Server:
     def setRequestHandler(self, requestType: str, requestHandler: Callable, loopName = "mainloop"):
         self.requestHandler.setEventHandler(loopName, Event(requestType), requestHandler)
 
-    def createEventLoop(self, name: str, timeout: float = 1) -> None:
+    def createRequestLoop(self, name: str, timeout: float = 1) -> None:
         self.requestHandler.addEventLoop(name, timeout)
 
     def getGroup(self, groupName: str) -> Group:
