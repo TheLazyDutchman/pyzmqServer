@@ -1,4 +1,5 @@
 from typing import Callable
+import tkinter as tk
 
 from . import connection
 from .events.event import Event
@@ -47,6 +48,9 @@ class Client:
 
     def createRequestLoop(self, name: str, timeout: float = 1) -> None:
         self.requestHandler.addEventLoop(name, timeout)
+
+    def createTkinterRequestLoop(self, name: str, app: tk.Tk, timeout: float = 1) -> None:
+        self.requestHandler.addTkinterEventLoop(name, app, timeout)
 
 
     def addEventType(self, eventType: str):

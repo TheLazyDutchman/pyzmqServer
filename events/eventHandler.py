@@ -1,8 +1,9 @@
 from typing import Callable
+import tkinter as tk
 
 from .event import Event
 from .eventQueue import EventQueue
-from .eventLoop import EventLoop
+from .eventLoop import EventLoop, ThreadedLoop, TkinterLoop
 
 
 
@@ -31,7 +32,7 @@ class EventHandler:
         queue.put(eventData)
         return True, "OK"
 
-    def addEvent(self, eventType: Event, maxQueueSize: int = 3):
+    def addEvent(self, eventType: Event, maxQueueSize: int = 3) -> None:
         if eventType.name in self.queues:
             # TODO: raise error here
             return
@@ -43,7 +44,15 @@ class EventHandler:
             # TODO: add error handling
             return
 
-        loop = EventLoop(timeout)
+        loop = ThreadedLoop(timeout)
+        self.loops[name] = loop
+
+    def addTkinterEventLoop(self, name: str, app: tk.Tk, timeout: float = 1) -> None:
+        if name in self.loops:
+            # TODO: add error handling
+            return
+
+        loop = TkinterLoop(app, timeout)
         self.loops[name] = loop
 
     def setEventHandler(self, loopName: str, eventType: Event, handler: Callable) -> None:
