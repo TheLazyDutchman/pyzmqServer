@@ -21,8 +21,8 @@ class Client:
 
         joinGroupEvent = Event("join group")
 
-        groupName = "main"
-        clientName = "client"
+        self.groupName = "main"
+        self.clientName = "client"
 
         self.eventHandler = EventHandler()
         self.eventConnection.SetCallback(lambda _, data: self.eventHandler.handleEvent(data[0], data[1]))
@@ -35,7 +35,7 @@ class Client:
         self.requestHandler.startLoop("main")
 
 
-        eventData = groupName, clientName, clientIp, requestReceivePort
+        eventData = self.groupName, self.clientName, clientIp, requestReceivePort
         self.requestSendConnection.SendMessage(joinGroupEvent, eventData)
 
 
