@@ -67,7 +67,7 @@ class Client:
 
     def SendRequest(self, requestType: str, data):
         event = Event(requestType)
-        reply = self.requestSendConnection.SendMessage(event, data)
+        reply = self.requestSendConnection.SendMessage(event, (self.groupName, self.clientName, data))
 
         return reply
 
