@@ -40,16 +40,17 @@ class Group:
 
 class Server:
 
-    def __init__(self, eventPort: int, replyPort: int, clientType: type[ClientConnection] = ClientConnection):
+    def __init__(self, eventPort: int, replyPort: int, clientType: type[ClientConnection] = ClientConnection, groupType: type[Group] = Group):
         self.eventConnection = connection.EventSender(eventPort)
         self.requestConnection = connection.RequestReceiver(replyPort, daemon = False)
 
         self.clientType = clientType
+        self.groupType = groupType
 
         self.eventLoops: dict[str, EventLoop] = {}
 
         self.groups: dict[str, Group] = {}
-        self.groups["main"] = Group("main")
+        self.groups["main"] = groupType("main")
 
         self.requestHandler = EventHandler()
 
