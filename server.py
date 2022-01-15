@@ -38,6 +38,9 @@ class Group:
     name: str
     clients: dict[str, ClientConnection] = field(default_factory=dict)
 
+    def join(self, clientName: str, client: ClientConnection) -> None:
+        self.clients[clientName] = client
+
 class Server:
 
     def __init__(self, eventPort: int, replyPort: int, clientType: type[ClientConnection] = ClientConnection, groupType: type[Group] = Group):
@@ -70,7 +73,7 @@ class Server:
         group = self.getGroup(groupName)
 
         conn = connection.RequestSender(clientIp, clientRequestRecievePort)
-        group.clients[clientName] = self.clientType(clientName, conn)
+        group.join(clientName, self.clientType(clientName, conn))
 
     def SendEvent(self, target: str, eventType: str, data):
         self.eventConnection.SendMessage(target, Event(eventType), data)
